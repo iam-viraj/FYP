@@ -1,0 +1,17 @@
+table th, table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+/* Style for the time column specifically */
+table td:nth-child(4) {
+  white-space: nowrap;
+  min-width: 100px;
+}
+
+/* Make sure the time is clearly visible */
+table td:nth-child(4) {
+  color: #333;
+  font-weight: 500;
+} 

@@ -1,0 +1,13 @@
+
+*.log
+*.env
+
+
+node_modules/
+
+
+build/
+
+logs/
+
+coverage/

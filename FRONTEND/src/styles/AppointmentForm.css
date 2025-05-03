@@ -1,0 +1,79 @@
+.time-slot-select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+.time-slot-select:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.time-slot-error {
+  color: red;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.form-group select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+  cursor: pointer;
+  font-size: 16px;
+  appearance: auto; /* This ensures the dropdown arrow appears */
+}
+
+.form-group select:not(:disabled):hover {
+  border-color: #007bff;
+}
+
+.form-group select:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.form-group select option {
+  padding: 10px;
+  background-color: white;
+}
+
+.form-group select option:disabled {
+  color: #999;
+  background-color: #f5f5f5;
+}
+
+.helper-text {
+  color: #666;
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+}
+
+.error-message {
+  color: #dc3545;
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+}
+
+.appointments-container table td {
+  padding: 12px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+/* Specific styling for time column */
+.appointments-container table td:nth-child(4) {
+  min-width: 100px;
+  white-space: nowrap;
+  font-family: monospace; /* Makes time more readable */
+} 

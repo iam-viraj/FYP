@@ -1,0 +1,339 @@
+.profile-page {
+  padding: 3rem 6rem;
+  max-width: 1200px;
+  margin: 100px auto 4rem;
+  min-height: calc(100vh - 200px);
+}
+
+.profile-title {
+  color: #2c3e50;
+  margin-bottom: 2rem;
+  margin-top: 15px;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.profile-card {
+  background: white;
+  border-radius: 12px;
+  padding: 3rem;
+  margin-bottom: 3rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+  color: #2c3e50;
+  margin-bottom: 2.5rem;
+  font-size: 1.5rem;
+  font-weight: 500;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 1.5rem;
+}
+
+.personal-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.info-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4rem;
+}
+
+.info-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.info-group label {
+  color: #666;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.info-group p {
+  color: #2c3e50;
+  font-size: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #eee;
+}
+
+.password-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 500px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.form-group input:focus {
+  border-color: #271776ca;
+  box-shadow: 0 0 0 2px rgba(39, 23, 118, 0.1);
+  outline: none;
+}
+
+.form-group input.error {
+  border-color: #dc3545;
+  background-color: #fff8f8;
+}
+
+.form-group input:disabled {
+  background-color: #f8f9fa;
+  cursor: not-allowed;
+}
+
+.update-button {
+  width: 100%;
+  padding: 12px;
+  background-color: #271776ca;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+  position: relative;
+}
+
+.update-button:hover:not(:disabled) {
+  background-color: #1a0f4d;
+}
+
+.update-button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.update-button.loading {
+  color: transparent;
+}
+
+.loading-spinner {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+.field-error {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+.error-message {
+  color: #dc3545;
+  background-color: #ffe6e6;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+@media (max-width: 1024px) {
+  .profile-page {
+    padding: 2rem 4rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .profile-page {
+    padding: 2rem;
+    margin-top: 80px;
+  }
+
+  .profile-card {
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .info-row {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .password-form {
+    max-width: 100%;
+  }
+}
+
+.btn-loading {
+  position: relative;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.btn-loading::after {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+  border: 4px solid transparent;
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: button-loading-spinner 1s ease infinite;
+}
+
+@keyframes button-loading-spinner {
+  from {
+    transform: rotate(0turn);
+  }
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+.update-button,
+.login-button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.update-button:disabled,
+.login-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.update-button.loading,
+.login-button.loading {
+  background-color: #0056b3;
+}
+
+/* Add visual feedback for input fields */
+input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+input.error {
+  border-color: #dc3545;
+  background-color: #fff8f8;
+}
+
+.success-message {
+  color: #28a745;
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  padding: 15px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  animation: fadeIn 0.3s ease-in;
+}
+
+.success-icon {
+  background-color: #28a745;
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  animation: scaleIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+/* Add pulse animation for success state */
+.form-group input.success {
+  border-color: #28a745;
+  animation: successPulse 0.5s ease;
+}
+
+@keyframes successPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(40, 167, 69, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+  }
+}
+
+/* Style for buttons in success state */
+.update-button.success,
+.login-button.success {
+  background-color: #28a745;
+  transition: background-color 0.3s ease;
+}
+
+.update-button.success:hover,
+.login-button.success:hover {
+  background-color: #218838;
+} 
