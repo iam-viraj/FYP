@@ -2,63 +2,70 @@ import axios from "axios";
 import { useState, useEffect, useRef } from "react";
 import io from "socket.io-client";
 
-const socket = io("http://localhost:4001"); // Adjust if needed
+const socket = io("http://localhost:4001");
 
 export default function Chats() {
   const [newMessage, setNewMessage] = useState("");
   const [messages, setMessages] = useState({});
   const [doctors, setDoctors] = useState([]);
   const [selectedDoctorId, setSelectedDoctorId] = useState(null);
-  const [patientId, setPatientId] = useState(null); // State to store patient ID
+  const [patientId, setPatientId] = useState(null);
   const chatEndRef = useRef(null);
 
-  // Fetch patient ID
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const { data } = await axios.get(
-          "http://localhost:4001/api/v1/user/patient/me",
-          {
-            withCredentials: true,
-            headers: { "Content-Type": "application/json" },
-          }
-        );
-
-        console.log(data)
+        const { data } = await axios.get("http://localhost:4001/api/v1/user/patient/me", {
+          withCredentials: true,
+          headers: { "Content-Type": "application/json" },
+        });
         setPatientId(data.user._id);
-        
       } catch (error) {
         console.error("Error fetching user data:", error);
-        
-      } 
+      }
     };
-
     fetchUserData();
   }, []);
 
-  // Fetch doctors list
   useEffect(() => {
     const fetchDoctors = async () => {
       try {
         const response = await fetch("http://localhost:4001/api/v1/user/doctor/getalldoctor");
-        if (!response.ok) {
-          throw new Error(`Failed to fetch doctors: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`Failed to fetch doctors: ${response.status}`);
         const data = await response.json();
         setDoctors(data.doctors);
-        console.log("Fetched doctors:", data);
       } catch (error) {
         console.error("Error fetching doctors:", error);
       }
     };
-
     fetchDoctors();
   }, []);
 
-  // Join a doctor and start listening for messages
   useEffect(() => {
     if (patientId && selectedDoctorId) {
-      socket.emit("join", patientId, selectedDoctorId); // Patient joins the chat with the selected doctor
+      socket.emit("join", patientId, selectedDoctorId);
+
+      const fetchMessages = async () => {
+        try {
+          const res = await axios.get(
+            `http://localhost:4001/api/chats/${patientId}/${selectedDoctorId}`,
+            { withCredentials: true }
+          );
+          if (res.data.success) {
+            const formatted = res.data.messages.map((msg) => ({
+              sender: msg.from === patientId ? "You" : "Doctor",
+              message: msg.message,
+            }));
+            setMessages((prev) => ({
+              ...prev,
+              [selectedDoctorId]: formatted,
+            }));
+          }
+        } catch (err) {
+          console.error("Failed to fetch chat history:", err);
+        }
+      };
+      fetchMessages();
 
       socket.on("receive_message", ({ fromUserId, message }) => {
         setMessages((prev) => ({
@@ -83,7 +90,7 @@ export default function Chats() {
     }));
 
     socket.emit("send_message", {
-      fromUserId: patientId, // Sending the patient ID
+      fromUserId: patientId,
       toUserId: selectedDoctorId,
       message: newMessage,
     });
@@ -99,16 +106,16 @@ export default function Chats() {
     <div
       style={{
         position: "fixed",
-        top: "64px", // Push below navbar
+        top: "90px", // Leave space for navbar
         left: 0,
         right: 0,
         bottom: 0,
         display: "flex",
-        height: "calc(100vh - 64px)",
+        height: "calc(100vh - 90px)",
         width: "100vw",
         backgroundColor: "#f5f5f5",
         fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-        overflow: "hidden",
+        
       }}
     >
       {/* Sidebar */}
@@ -118,7 +125,6 @@ export default function Chats() {
           backgroundColor: "#ffffff",
           padding: "16px",
           borderRight: "1px solid #e0e0e0",
-          boxShadow: "2px 0 10px rgba(0, 0, 0, 0.1)",
           overflowY: "auto",
         }}
       >
@@ -127,7 +133,7 @@ export default function Chats() {
         </h2>
         {doctors.map((doctor) => (
           <div
-            key={doctor._id} // Using doctor ID as the key
+            key={doctor._id}
             onClick={() => setSelectedDoctorId(doctor._id)}
             style={{
               padding: "12px",
@@ -137,101 +143,98 @@ export default function Chats() {
               backgroundColor: selectedDoctorId === doctor._id ? "#e3f2fd" : "#ffffff",
               border: "1px solid #ddd",
               boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-              transition: "background-color 0.3s, transform 0.2s",
             }}
           >
-            <span
-              style={{
-                fontSize: "18px",
-                fontWeight: "500",
-                color: "#1976d2",
-                display: "block",
-              }}
-            >
-              Dr. {doctor.firstName} {doctor.lastName} {/* Display first and last name */}
+            <span style={{ fontSize: "18px", fontWeight: "500", color: "#1976d2" }}>
+              Dr. {doctor.firstName} {doctor.lastName}
             </span>
           </div>
         ))}
       </div>
 
-      {/* Chat Section */}
       <div
-        style={{
-          flexGrow: 1,
-          display: "flex",
-          flexDirection: "column",
-          padding: "20px",
-          backgroundColor: "#ffffff",
-          overflow: "hidden",
-          boxShadow: "-2px 0 10px rgba(0, 0, 0, 0.1)",
-        }}
-      >
+  style={{
+    flexGrow: 1,
+    display: "flex",
+    flexDirection: "column",
+    backgroundColor: "#ffffff",
+    height: "100%", // Important
+    minHeight: 0,   // Crucial for flex scroll behavior
+  }}
+>
+
+
+
         <h2
           style={{
-            fontSize: "24px",
+            fontSize: "20px",
             fontWeight: "600",
-            marginBottom: "20px",
+            padding: "16px",
             color: "#333",
+            borderBottom: "1px solid #ddd",
             textAlign: "center",
           }}
         >
           {selectedDoctorId
-            ? `Chat with Dr. ${doctors.find((doctor) => doctor._id === selectedDoctorId)?.firstName} ${
-                doctors.find((doctor) => doctor._id === selectedDoctorId)?.lastName
-              }`
+            ? `Chat with Dr. ${doctors.find((d) => d._id === selectedDoctorId)?.firstName} ${
+                doctors.find((d) => d._id === selectedDoctorId)?.lastName
+              } ${doctors.find((d) => d._id === selectedDoctorId)?.doctorDepartment || ""}`
             : "Select a Doctor"}
         </h2>
-        <div
-          style={{
-            flexGrow: 1,
-            display: "flex",
-            flexDirection: "column",
-            overflowY: "auto",
-            gap: "16px",
-            marginBottom: "24px",
-            paddingRight: "10px",
-          }}
-        >
-          {(messages[selectedDoctorId] || []).map((msg, idx) => (
-            <div
-              key={idx}
-              style={{
-                maxWidth: "80%",
-                padding: "14px",
-                borderRadius: "12px",
-                boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                alignSelf: msg.sender === "You" ? "flex-end" : "flex-start",
-                backgroundColor: msg.sender === "You" ? "#dbeafe" : "#f5f5f5",
-                border: msg.sender === "You" ? "1px solid #3b82f6" : "1px solid #ccc",
-                fontSize: "14px",
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "12px",
-                  color: "#777",
-                  display: "block",
-                  marginBottom: "8px",
-                }}
-              >
-                {msg.sender}
-              </span>
-              <p style={{ margin: 0 }}>{msg.message}</p>
-            </div>
-          ))}
-          <div ref={chatEndRef} />
-        </div>
 
-        {/* Input Section */}
+    <div
+  style={{
+    flexGrow: 1,
+    overflowY: "auto",
+    padding: "16px 10px",
+    display: "flex",
+    flexDirection: "column",
+    minHeight: 0, // Makes overflowY work inside flexbox
+    maxHeight: "100%", // Enforce container height
+  }}
+>
+  {(messages[selectedDoctorId] || []).map((msg, idx) => (
+   <div
+   key={idx}
+   style={{
+     maxWidth: "80%",
+     overflow: "hidden", // Keeps scroll issue fixed
+     padding: "14px",
+     borderRadius: "12px",
+     boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+     alignSelf: msg.sender === "You" ? "flex-end" : "flex-start",
+     backgroundColor: msg.sender === "You" ? "#dbeafe" : "#f5f5f5",
+     border: msg.sender === "You" ? "1px solid #3b82f6" : "1px solid #ccc",
+     wordBreak: "break-word",
+     marginBottom: "12px",
+     
+     display: "flex",  // Enable flexbox for centering text
+     justifyContent: "center", // Horizontally center the text
+     alignItems: "center", // Vertically center the text
+     textAlign: "center", // Ensure text inside is centered
+   }}
+ >
+   {/* <span style={{ fontSize: "12px", color: "#777", display: "block", marginBottom: "8px" }}>
+     {msg.sender}
+   </span> */}
+   <p style={{ margin: 0, textAlign: "center" }}>{msg.message}</p>
+ </div>
+ 
+  ))}
+  <div ref={chatEndRef} />
+</div>
+
+
+
+        {/* Message Input */}
         <div
           style={{
             display: "flex",
             gap: "10px",
             alignItems: "center",
-            paddingTop: "16px",
-            borderTop: "1px solid #f0f0f0",
+            padding: "16px",
+            borderTop: "1px solid #ddd",
             backgroundColor: "#fafafa",
-            boxShadow: "0 -4px 6px rgba(0, 0, 0, 0.1)",
           }}
         >
           <input
@@ -245,7 +248,6 @@ export default function Chats() {
               padding: "12px 20px",
               fontSize: "14px",
               backgroundColor: "#f9f9f9",
-              transition: "all 0.3s",
             }}
           />
           <button
@@ -258,7 +260,6 @@ export default function Chats() {
               border: "none",
               fontSize: "16px",
               cursor: "pointer",
-              transition: "background-color 0.3s",
             }}
             onMouseEnter={(e) => (e.target.style.backgroundColor = "#2563eb")}
             onMouseLeave={(e) => (e.target.style.backgroundColor = "#3b82f6")}
@@ -270,3 +271,4 @@ export default function Chats() {
     </div>
   );
 }
+ 

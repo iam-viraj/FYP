@@ -1,4 +1,6 @@
-const mongoose = require("mongoose");
+// chats.js
+import mongoose from "mongoose";
+
 const { Schema } = mongoose;
 
 const messageSchema = new Schema(
@@ -11,4 +13,5 @@ const messageSchema = new Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Chats", messageSchema);
+const Chats = mongoose.model("Chats", messageSchema);
+export default Chats;

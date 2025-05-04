@@ -2,6 +2,8 @@ import { app } from "./app.js";
 import { dbConnection } from "./database/dbConnection.js";
 import cloudinary from 'cloudinary';
 import { Server } from "socket.io"; // Import socket.io
+import chats from "./models/chats.js";
+
 
 // Cloudinary configuration
 cloudinary.v2.config({
@@ -44,11 +46,11 @@ io.on("connection", (socket) => {
   // Handle sending messages
   socket.on("send_message", async ({ fromUserId, toUserId, message }) => {
     // Here you can save the message to the database (assuming you have a message model)
-    // const newMessage = await Message.create({
-    //   from: fromUserId,
-    //   to: toUserId,
-    //   message,
-    // });
+    const newMessage = await chats.create({
+      from: fromUserId,
+      to: toUserId,
+      message,
+    });
 
     // Emit the message to the intended recipient
     const toSocketId = onlineUsers.get(toUserId);

@@ -44,6 +44,8 @@ const Navbar = () => {
 
           backdropFilter: "blur(10px)",
           backdropBrightness: "0.5",
+          height:"50px",
+          overflow:"hidden"
         }}
       >
         <div className="logo">

@@ -72,7 +72,7 @@ const App = () => {
             element={isAuthenticated ? <Profile /> : <Navigate to="/login" />}
           />
         </Routes>
-        <Footer />
+       
         <ToastContainer position="top-center" />
       </Router>
     </>

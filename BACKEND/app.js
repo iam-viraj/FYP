@@ -15,6 +15,7 @@ import patientRouter from "./router/patientRouter.js";
 import adminRouter from "./router/adminRouter.js";
 import path from 'path';
 import { fileURLToPath } from 'url';
+import chatRoutes from "./routes/chatRoutes.js";
 
 config({ path: './config/config.env' });
 
@@ -42,6 +43,7 @@ app.use("/api/v1/appointment", appointmentRouter);
 app.use("/api/v1/user/doctor", doctorRouter);
 app.use("/api/v1/user/patient", patientRouter);
 app.use("/api/v1/user", adminRouter);
+app.use("/api/chats", chatRoutes);
 
 // Connect to the database
 dbConnection();

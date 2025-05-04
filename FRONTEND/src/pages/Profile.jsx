@@ -32,7 +32,7 @@ const Profile = () => {
             headers: { "Content-Type": "application/json" },
           }
         );
-
+        
         if (data.success) {
           setUser(data.user);
         } else {
@@ -61,14 +61,20 @@ const Profile = () => {
           headers: { "Content-Type": "application/json" },
         }
       );
-
+  
       if (data?.success) {
-        setAppointments(data.appointments);
-        console.log("Appointments:", appointments);
-
-        setShowAppointments(true);
-        if (data.appointments.length === 0) {
-          toast.info("No appointments found");
+        // Assuming patientId is the ID of the logged-in user
+        const filteredAppointments = data.appointments.filter(
+          (appointment) => appointment.patientId._id === user._id // filter by the logged-in user's patientId
+        );
+  
+        if (filteredAppointments.length > 0) {
+          setAppointments(filteredAppointments); // Update state with filtered appointments
+          console.log("Filtered Appointments:", filteredAppointments);
+  
+          setShowAppointments(true);
+        } else {
+          toast.info("No appointments found for this user.");
         }
       }
     } catch (error) {
@@ -80,6 +86,7 @@ const Profile = () => {
       setIsLoadingAppointments(false);
     }
   };
+  
 
   const validatePasswords = () => {
     const errors = {

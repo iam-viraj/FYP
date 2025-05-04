@@ -9,28 +9,24 @@ export default function DoctorChats() {
   const [messages, setMessages] = useState({});
   const [patients, setPatients] = useState([]);
   const [doctor, setDoctor] = useState(null);
-  const [selectedPatient, setSelectedPatient] = useState(null); // Track selected patient
+  const [selectedPatient, setSelectedPatient] = useState(null);
   const chatEndRef = useRef(null);
 
+  // Fetch doctor info and appointments
   useEffect(() => {
     const fetchDoctorAndPatients = async () => {
       try {
-        // Step 1: Get doctor profile
-        const doctorRes = await axios.get(
-          "http://localhost:4001/api/v1/user/doctor/me",
-          { withCredentials: true }
-        );
-        const doctorData = doctorRes.data.user; // Assuming doctor is in `user`
+        const doctorRes = await axios.get("http://localhost:4001/api/v1/user/doctor/me", {
+          withCredentials: true,
+        });
+        const doctorData = doctorRes.data.user;
         setDoctor(doctorData._id);
-        console.log("doctor::", doctorData._id);
 
-        // Step 2: Get appointments
         const appointmentsRes = await axios.get(
           "http://localhost:4001/api/v1/user/doctor/appointments",
           { withCredentials: true }
         );
 
-        // Step 3: Filter appointments based on doctor's department
         const filteredAppointments = appointmentsRes.data.appointments.filter(
           (appointment) => appointment.department === doctorData.doctorDepartment
         );
@@ -39,15 +35,16 @@ export default function DoctorChats() {
 
         filteredAppointments.forEach((appointment) => {
           const patientInfo = {
-            id: appointment.patientId._id, // Patient ID
-            accountName: appointment.patientId?.firstName + ' ' + appointment.patientId?.lastName,
+            id: appointment.patientId._id,
+            accountName:
+              appointment.patientId?.firstName + " " + appointment.patientId?.lastName,
             firstName: appointment.firstName,
             lastName: appointment.lastName,
             email: appointment.email,
             phone: appointment.phone,
-            dob: appointment.dob || 'Not provided',
-            address: appointment.address || 'Not provided',
-            createdAt: appointment.createdAt
+            dob: appointment.dob || "Not provided",
+            address: appointment.address || "Not provided",
+            createdAt: appointment.createdAt,
           };
 
           if (!patientsMap.has(patientInfo.id)) {
@@ -55,7 +52,9 @@ export default function DoctorChats() {
           }
         });
 
-        const uniquePatients = Array.from(patientsMap.values()).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        const uniquePatients = Array.from(patientsMap.values()).sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
 
         setPatients(uniquePatients);
       } catch (error) {
@@ -66,15 +65,37 @@ export default function DoctorChats() {
     fetchDoctorAndPatients();
   }, []);
 
-  // Join the socket room when the component mounts or when a new patient is selected
+  // Join room + Fetch messages + Setup socket listener
   useEffect(() => {
     if (doctor && selectedPatient) {
-      // Emit 'join' event for the doctor and selected patient
       socket.emit("join", doctor, selectedPatient.id);
 
-      // Listen for incoming messages from the selected patient
+      // Fetch past messages
+      const fetchMessages = async () => {
+        try {
+          const res = await axios.get(
+            `http://localhost:4001/api/chats/${doctor}/${selectedPatient.id}`,
+            { withCredentials: true }
+          );
+          if (res.data.success) {
+            const formatted = res.data.messages.map((msg) => ({
+              sender: msg.from === doctor ? "You" : "Patient",
+              message: msg.message,
+            }));
+
+            setMessages((prev) => ({
+              ...prev,
+              [selectedPatient.id]: formatted,
+            }));
+          }
+        } catch (err) {
+          console.error("Failed to fetch chat history:", err);
+        }
+      };
+
+      fetchMessages();
+
       socket.on("receive_message", ({ fromUserId, message }) => {
-        console.log("Message received:", message); // Log received message
         setMessages((prev) => ({
           ...prev,
           [fromUserId]: [...(prev[fromUserId] || []), { sender: "Patient", message }],
@@ -87,7 +108,7 @@ export default function DoctorChats() {
     }
   }, [doctor, selectedPatient]);
 
-  // Send message to the selected patient
+  // Send message
   const handleSend = () => {
     if (!newMessage.trim() || !selectedPatient) return;
 
@@ -97,7 +118,6 @@ export default function DoctorChats() {
       [selectedPatient.id]: [...(prev[selectedPatient.id] || []), newMsg],
     }));
 
-    // Emit 'send_message' event with the message
     socket.emit("send_message", {
       fromUserId: doctor,
       toUserId: selectedPatient.id,
@@ -107,7 +127,7 @@ export default function DoctorChats() {
     setNewMessage("");
   };
 
-  // Scroll to the latest message
+  // Scroll to latest
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -115,21 +135,32 @@ export default function DoctorChats() {
   return (
     <div style={{ display: "flex", height: "100vh", width: "100vw", color: "black" }}>
       {/* Sidebar */}
-      <div style={{ width: "150px", backgroundColor: "#f3f3f3", padding: "16px", borderRight: "1px solid #ccc" , marginLeft:"304px"}}>
-        <h2 style={{ fontSize: "20px", fontWeight: "bold", marginBottom: "16px" }}>Patients</h2>
+      <div
+        style={{
+          width: "150px",
+          backgroundColor: "#f3f3f3",
+          padding: "16px",
+          borderRight: "1px solid #ccc",
+          marginLeft: "304px",
+        }}
+      >
+        <h2 style={{ fontSize: "20px", fontWeight: "bold", marginBottom: "16px" }}>
+          Patients
+        </h2>
         {patients.length === 0 ? (
           <p>No patients available</p>
         ) : (
           patients.map((patient) => (
             <div
               key={patient.id}
-              onClick={() => setSelectedPatient(patient)} // Set selected patient
+              onClick={() => setSelectedPatient(patient)}
               style={{
                 padding: "8px",
                 borderRadius: "4px",
                 cursor: "pointer",
                 marginBottom: "8px",
-                backgroundColor: selectedPatient?.id === patient.id ? "#3b82f6" : "#bfdbfe",
+                backgroundColor:
+                  selectedPatient?.id === patient.id ? "#3b82f6" : "#bfdbfe",
                 border: "1px solid #ddd",
               }}
             >
